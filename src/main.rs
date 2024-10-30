@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
 use macroquad::{
     prelude::*,
@@ -56,7 +56,7 @@ pub async fn main() -> Result<(), String> {
             break 'running;
         }
 
-        update_dropper(&mut cells, &mut brush).await;
+        update_brush(&mut cells, &mut brush).await;
         update_world(&mut cells).await;
         draw_world(&mut cells, &mut image, &texture, &texture_param).await;
 
@@ -66,7 +66,7 @@ pub async fn main() -> Result<(), String> {
     Ok(())
 }
 
-async fn update_dropper(cells: &mut [Cell], brush: &mut Cell) {
+async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
     let ui_windows_size = Vec2::new(150., 200.);
     let ui_windows_pos = Vec2::new(25., 25.);
 
