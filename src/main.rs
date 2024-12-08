@@ -67,23 +67,27 @@ pub async fn main() -> Result<(), String> {
 }
 
 async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
-    let ui_windows_size = Vec2::new(150., 200.);
+    let ui_windows_size = Vec2::new(150., 100.);
     let ui_windows_pos = Vec2::new(25., 25.);
 
     widgets::Window::new(hash!(), ui_windows_pos, ui_windows_size)
-        .label("User Window")
+        .movable(false)
+        .label("Input")
         .ui(&mut root_ui(), |ui| {
-            ui.tree_node(hash!(), "Brushes", |ui| {
-                if ui.button(Vec2::new(10., 25.), "Sand") {
-                    *brush = Cell::spawn_sand()
+            if ui.button(Vec2::new(10., 10.), "Sand") {
+                *brush = Cell::spawn_sand()
+            }
+            if ui.button(Vec2::new(50., 10.), "Water") {
+                *brush = Cell::spawn_water()
+            }
+            if ui.button(Vec2::new(95., 10.), "Stone") {
+                *brush = Cell::spawn_stone()
+            }
+            if ui.button(Vec2::new(10., 50.), "Clear") {
+                for cell in cells.iter_mut() {
+                    *cell = Cell::spawn_empty();
                 }
-                if ui.button(Vec2::new(10., 50.), "Water") {
-                    *brush = Cell::spawn_water()
-                }
-                if ui.button(Vec2::new(10., 75.), "Stone") {
-                    *brush = Cell::spawn_stone()
-                }
-            });
+            }
         });
 
     //Change Brush
@@ -97,7 +101,6 @@ async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
                     *cell = Cell::spawn_empty();
                 }
             }
-            //TODO: add button to clear canvas
             _ => (),
         }
     }
