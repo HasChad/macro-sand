@@ -1,9 +1,6 @@
 // #![windows_subsystem = "windows"]
 
-use macroquad::{
-    prelude::*,
-    ui::{hash, root_ui, widgets},
-};
+use macroquad::prelude::*;
 
 mod cell_updates;
 mod cells;
@@ -64,29 +61,6 @@ pub async fn main() -> Result<(), String> {
 }
 
 async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
-    let ui_windows_size = Vec2::new(150., 100.);
-    let ui_windows_pos = Vec2::new(25., 25.);
-
-    widgets::Window::new(hash!(), ui_windows_pos, ui_windows_size)
-        .movable(false)
-        .label("Input")
-        .ui(&mut root_ui(), |ui| {
-            if ui.button(Vec2::new(10., 10.), "Sand") {
-                *brush = Cell::spawn_sand()
-            }
-            if ui.button(Vec2::new(50., 10.), "Water") {
-                *brush = Cell::spawn_water()
-            }
-            if ui.button(Vec2::new(95., 10.), "Stone") {
-                *brush = Cell::spawn_stone()
-            }
-            if ui.button(Vec2::new(10., 50.), "Clear") {
-                for cell in cells.iter_mut() {
-                    *cell = Cell::spawn_empty();
-                }
-            }
-        });
-
     //Change Brush
     if let Some(input) = get_last_key_pressed() {
         match input {
@@ -112,10 +86,6 @@ async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
         && mouse_xpos < screen_width()
         && mouse_ypos >= 0.
         && mouse_ypos < screen_height()
-        && !((mouse_xpos > ui_windows_pos.x)
-            && (mouse_xpos < ui_windows_pos.x + ui_windows_size.x)
-            && (mouse_ypos > ui_windows_pos.y)
-            && (mouse_ypos < ui_windows_pos.y + ui_windows_size.y))
     {
         if is_mouse_button_down(MouseButton::Left) && cells[pixel_pos] == Cell::spawn_empty() {
             cells[pixel_pos] = *brush;
