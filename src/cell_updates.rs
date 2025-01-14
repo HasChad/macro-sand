@@ -3,9 +3,7 @@ use crate::{
     GRID_X_SIZE, GRID_Y_SIZE,
 };
 
-pub async fn update_sand(x: usize, y: usize, cells: &mut [Cell]) {
-    let pixel_pos: usize = (y * GRID_X_SIZE) + x;
-
+pub async fn update_sand(x: usize, y: usize, pixel_pos: usize, cells: &mut [Cell]) {
     let down: usize = if y < GRID_Y_SIZE - 1 {
         pixel_pos + GRID_X_SIZE
     } else {
