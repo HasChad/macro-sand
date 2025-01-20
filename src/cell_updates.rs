@@ -1,5 +1,3 @@
-use macroquad::prelude::info;
-
 use crate::{
     cells::{Cell, CellState, Direction},
     GRID_X_SIZE, GRID_Y_SIZE,
@@ -36,8 +34,8 @@ pub async fn update_sand(
     let down_right: usize = down + 1;
 
     // Down-Side checker
-    let downleft_is_empty = cells[down_left] == Cell::spawn_empty();
-    let downright_is_empty = cells[down_right] == Cell::spawn_empty();
+    let downleft_is_empty = cells[down_left] == Cell::spawn_empty() && x != 0;
+    let downright_is_empty = cells[down_right] == Cell::spawn_empty() && x != GRID_X_SIZE - 1;
 
     // Down
     if cells[down] == Cell::spawn_empty() {
@@ -77,7 +75,6 @@ pub async fn update_water(
     // checkers
     let downleft_is_empty = cells[down_left] == Cell::spawn_empty();
     let downright_is_empty = cells[down_right] == Cell::spawn_empty();
-
     let left_is_empty = cells[left] == Cell::spawn_empty() && x != 0;
     let right_is_empty = cells[right] == Cell::spawn_empty() && x != GRID_X_SIZE - 1;
 
@@ -112,19 +109,21 @@ pub async fn update_water(
             }
         //Right
         } else if right_is_empty {
-            cells[right] = Cell::spawn_water();
-            cells[pixel_pos] = Cell::spawn_empty();
+            buffer[right] = Cell::spawn_water();
+            buffer[pixel_pos] = Cell::spawn_empty();
 
         //Left
         } else if left_is_empty {
-            cells[left] = Cell::spawn_water();
-            cells[pixel_pos] = Cell::spawn_empty();
+            buffer[left] = Cell::spawn_water();
+            buffer[pixel_pos] = Cell::spawn_empty();
         }
-    } else {
-        match cells[pixel_pos].move_direction {
-            Direction::Left => cells[pixel_pos].move_direction = Direction::Right,
-            Direction::Right => cells[pixel_pos].move_direction = Direction::Left,
-            Direction::None => (),
-        }
-    }
+    } /*
+      else {
+          match cells[pixel_pos].move_direction {
+              Direction::Left => cells[pixel_pos].move_direction = Direction::Right,
+              Direction::Right => cells[pixel_pos].move_direction = Direction::Left,
+              Direction::None => (),
+          }
+      }
+      */
 }
