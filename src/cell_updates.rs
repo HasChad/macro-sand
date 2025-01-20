@@ -3,24 +3,29 @@ use crate::{
     GRID_X_SIZE, GRID_Y_SIZE,
 };
 
+pub async fn update_world(cells: &mut [Cell]) {
+    // Pixel iterate
+    for y in (0..GRID_Y_SIZE).rev() {
+        for x in 0..GRID_X_SIZE {
+            let pixel_pos: usize = (y * GRID_X_SIZE) + x;
+
+            match cells[pixel_pos].state {
+                CellState::Sand => update_sand(x, y, pixel_pos, cells).await,
+                CellState::Water => update_water(x, y, cells).await,
+                _ => (),
+            }
+        }
+    }
+}
+
 pub async fn update_sand(x: usize, y: usize, pixel_pos: usize, cells: &mut [Cell]) {
-    let down: usize = if y < GRID_Y_SIZE - 1 {
-        pixel_pos + GRID_X_SIZE
-    } else {
-        pixel_pos
-    };
+    if y == GRID_Y_SIZE - 1 {
+        return;
+    }
 
-    let down_left: usize = if x > 0 && down != pixel_pos {
-        down - 1
-    } else {
-        pixel_pos
-    };
-
-    let down_right: usize = if x < GRID_X_SIZE - 1 && down != pixel_pos {
-        down + 1
-    } else {
-        pixel_pos
-    };
+    let down: usize = pixel_pos + GRID_X_SIZE;
+    let down_left: usize = down - 1;
+    let down_right: usize = down + 1;
 
     // Down-Side checker
     let downleft_is_empty = cells[down_left] == Cell::spawn_empty();

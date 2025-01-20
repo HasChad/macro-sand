@@ -2,11 +2,13 @@
 
 use macroquad::prelude::*;
 
+mod brush_update;
 mod cell_updates;
 mod cells;
 
+use brush_update::*;
 use cell_updates::*;
-use cells::{Cell, CellState};
+use cells::Cell;
 
 const GRID_X_SIZE: usize = 300;
 const GRID_Y_SIZE: usize = 160;
@@ -33,6 +35,7 @@ pub async fn main() -> Result<(), String> {
     let texture = Texture2D::from_image(&image);
 
     // Game things
+    let mut buffer = vec![Cell::spawn_empty(); GRID_X_SIZE * GRID_Y_SIZE];
     let mut cells = vec![Cell::spawn_empty(); GRID_X_SIZE * GRID_Y_SIZE];
     let mut brush = Cell::spawn_sand();
 
@@ -58,106 +61,6 @@ pub async fn main() -> Result<(), String> {
     }
 
     Ok(())
-}
-
-async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
-    //Change Brush
-    if let Some(input) = get_last_key_pressed() {
-        match input {
-            KeyCode::Key1 => *brush = Cell::spawn_sand(),
-            KeyCode::Key2 => *brush = Cell::spawn_water(),
-            KeyCode::Key3 => *brush = Cell::spawn_stone(),
-            KeyCode::C => {
-                for cell in cells.iter_mut() {
-                    *cell = Cell::spawn_empty();
-                }
-            }
-            _ => (),
-        }
-    }
-
-    //Mouse Click Spawn
-    let (mouse_xpos, mouse_ypos) = mouse_position();
-    let pixel_posx = mouse_xpos as usize / DOT_SIZE_IN_PXS;
-    let pixel_posy = mouse_ypos as usize / DOT_SIZE_IN_PXS;
-    let pixel_pos = pixel_posx + (pixel_posy * GRID_X_SIZE);
-
-    if mouse_xpos >= 0.
-        && mouse_xpos < screen_width()
-        && mouse_ypos >= 0.
-        && mouse_ypos < screen_height()
-    {
-        if is_mouse_button_down(MouseButton::Left) && cells[pixel_pos] == Cell::spawn_empty() {
-            cells[pixel_pos] = *brush;
-
-            //top
-            // cells[pixel_pos - 2 * GRID_X_SIZE - 2] = *brush;
-            // cells[pixel_pos - 2 * GRID_X_SIZE - 1] = *brush;
-            // cells[pixel_pos - 2 * GRID_X_SIZE] = *brush;
-            // cells[pixel_pos - 2 * GRID_X_SIZE + 1] = *brush;
-            // cells[pixel_pos - 2 * GRID_X_SIZE + 2] = *brush;
-
-            // cells[pixel_pos - GRID_X_SIZE - 2] = *brush;
-            cells[pixel_pos - GRID_X_SIZE - 1] = *brush;
-            cells[pixel_pos - GRID_X_SIZE] = *brush;
-            cells[pixel_pos - GRID_X_SIZE + 1] = *brush;
-            // cells[pixel_pos - GRID_X_SIZE + 2] = *brush;
-
-            //middle
-            cells[pixel_pos - 2] = *brush;
-            cells[pixel_pos - 1] = *brush;
-            cells[pixel_pos + 1] = *brush;
-            cells[pixel_pos + 2] = *brush;
-
-            //bottom
-            // cells[pixel_pos + GRID_X_SIZE - 2] = *brush;
-            cells[pixel_pos + GRID_X_SIZE - 1] = *brush;
-            cells[pixel_pos + GRID_X_SIZE] = *brush;
-            cells[pixel_pos + GRID_X_SIZE + 1] = *brush;
-            // cells[pixel_pos + GRID_X_SIZE + 2] = *brush;
-
-            // cells[pixel_pos + 2 * GRID_X_SIZE - 2] = *brush;
-            // cells[pixel_pos + 2 * GRID_X_SIZE - 1] = *brush;
-            // cells[pixel_pos + 2 * GRID_X_SIZE] = *brush;
-            // cells[pixel_pos + 2 * GRID_X_SIZE + 1] = *brush;
-            // cells[pixel_pos + 2 * GRID_X_SIZE + 2] = *brush;
-        }
-
-        if is_mouse_button_down(MouseButton::Right) {
-            cells[pixel_pos] = Cell::spawn_empty();
-
-            //top
-            cells[pixel_pos - GRID_X_SIZE - 1] = Cell::spawn_empty();
-            cells[pixel_pos - GRID_X_SIZE] = Cell::spawn_empty();
-            cells[pixel_pos - GRID_X_SIZE + 1] = Cell::spawn_empty();
-
-            //middle
-            cells[pixel_pos - 2] = Cell::spawn_empty();
-            cells[pixel_pos - 1] = Cell::spawn_empty();
-            cells[pixel_pos + 1] = Cell::spawn_empty();
-            cells[pixel_pos + 2] = Cell::spawn_empty();
-
-            //bottom
-            cells[pixel_pos + GRID_X_SIZE - 1] = Cell::spawn_empty();
-            cells[pixel_pos + GRID_X_SIZE] = Cell::spawn_empty();
-            cells[pixel_pos + GRID_X_SIZE + 1] = Cell::spawn_empty();
-        }
-    }
-}
-
-async fn update_world(cells: &mut [Cell]) {
-    // Pixel iterate
-    for y in (0..GRID_Y_SIZE).rev() {
-        for x in 0..GRID_X_SIZE {
-            let pixel_pos: usize = (y * GRID_X_SIZE) + x;
-
-            match cells[pixel_pos].state {
-                CellState::Sand => update_sand(x, y, pixel_pos, cells).await,
-                CellState::Water => update_water(x, y, cells).await,
-                _ => (),
-            }
-        }
-    }
 }
 
 async fn draw_world(cells: &mut [Cell], image: &mut Image, texture: &Texture2D) {
