@@ -2,27 +2,19 @@
 
 use macroquad::prelude::*;
 
+mod app_settings;
 mod brush_update;
 mod cell_updates;
 mod cells;
 
+use app_settings::*;
 use brush_update::*;
 use cell_updates::*;
-use cells::Cell;
+use cells::*;
 
 const GRID_X_SIZE: usize = 300;
 const GRID_Y_SIZE: usize = 160;
 const DOT_SIZE_IN_PXS: usize = 4;
-
-fn window_conf() -> Conf {
-    Conf {
-        window_title: "Macro-Sand".into(),
-        window_width: (GRID_X_SIZE * DOT_SIZE_IN_PXS) as i32,
-        window_height: (GRID_Y_SIZE * DOT_SIZE_IN_PXS) as i32,
-        window_resizable: false,
-        ..Default::default()
-    }
-}
 
 #[macroquad::main(window_conf)]
 pub async fn main() -> Result<(), String> {
@@ -53,9 +45,9 @@ pub async fn main() -> Result<(), String> {
             std::thread::sleep(std::time::Duration::from_millis(time_to_sleep as u64));
         }
 
-        update_brush(&mut cells, &mut brush).await;
-        update_world(&mut cells).await;
-        draw_world(&mut cells, &mut image, &texture).await;
+        update_brush(&mut buffer, &mut brush).await;
+        update_world(&mut cells, &mut buffer).await;
+        draw_world(&mut cells, &mut buffer, &mut image, &texture).await;
 
         next_frame().await
     }
@@ -63,14 +55,21 @@ pub async fn main() -> Result<(), String> {
     Ok(())
 }
 
-async fn draw_world(cells: &mut [Cell], image: &mut Image, texture: &Texture2D) {
+async fn draw_world(
+    cells: &mut [Cell],
+    buffer: &mut [Cell],
+    image: &mut Image,
+    texture: &Texture2D,
+) {
     // Per-pixel coloring
-    for (i, cell) in cells.iter_mut().enumerate() {
+    for (i, cell) in buffer.iter_mut().enumerate() {
         image.set_pixel(
             (i % GRID_X_SIZE) as u32,
             (i / GRID_X_SIZE) as u32,
             cell.color,
         );
+
+        cells[i] = *cell;
     }
 
     // Cursor
