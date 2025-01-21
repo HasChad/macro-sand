@@ -35,7 +35,7 @@ pub async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
             //top
             // cells[pixel_pos - 2 * GRID_X_SIZE - 2] = *brush;
             // cells[pixel_pos - 2 * GRID_X_SIZE - 1] = *brush;
-            // cells[pixel_pos - 2 * GRID_X_SIZE] = *brush;
+            cells[pixel_pos - 2 * GRID_X_SIZE] = *brush;
             // cells[pixel_pos - 2 * GRID_X_SIZE + 1] = *brush;
             // cells[pixel_pos - 2 * GRID_X_SIZE + 2] = *brush;
 
@@ -60,7 +60,7 @@ pub async fn update_brush(cells: &mut [Cell], brush: &mut Cell) {
 
             // cells[pixel_pos + 2 * GRID_X_SIZE - 2] = *brush;
             // cells[pixel_pos + 2 * GRID_X_SIZE - 1] = *brush;
-            // cells[pixel_pos + 2 * GRID_X_SIZE] = *brush;
+            cells[pixel_pos + 2 * GRID_X_SIZE] = *brush;
             // cells[pixel_pos + 2 * GRID_X_SIZE + 1] = *brush;
             // cells[pixel_pos + 2 * GRID_X_SIZE + 2] = *brush;
         }

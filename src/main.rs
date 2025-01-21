@@ -61,16 +61,23 @@ async fn draw_world(
     image: &mut Image,
     texture: &Texture2D,
 ) {
+    let mut test = 0;
     // Per-pixel coloring
-    for (i, cell) in buffer.iter_mut().enumerate() {
+    for (i, cell) in buffer.iter().enumerate() {
         image.set_pixel(
             (i % GRID_X_SIZE) as u32,
             (i / GRID_X_SIZE) as u32,
             cell.color,
         );
 
+        if cell.state == CellState::Sand {
+            test += 1;
+        };
+
         cells[i] = *cell;
     }
+
+    info!("water count = {}", test);
 
     // Cursor
     let (mouse_xpos, mouse_ypos) = mouse_position();
