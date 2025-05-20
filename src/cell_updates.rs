@@ -1,7 +1,3 @@
-use std::io::BufReader;
-
-use macroquad::prelude::info;
-
 use crate::{
     cells::{Cell, CellState, Direction},
     GRID_X_SIZE, GRID_Y_SIZE,

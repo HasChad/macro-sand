@@ -1,5 +1,5 @@
 use macroquad::color::Color;
-use rand::{thread_rng, Rng};
+use rand::random_bool;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CellState {
@@ -46,7 +46,7 @@ impl Cell {
     pub fn spawn_sand() -> Cell {
         Cell {
             state: CellState::Sand,
-            move_direction: if thread_rng().gen_bool(0.5) {
+            move_direction: if random_bool(0.5) {
                 Direction::Left
             } else {
                 Direction::Right
@@ -60,7 +60,7 @@ impl Cell {
     pub fn spawn_water() -> Cell {
         Cell {
             state: CellState::Water,
-            move_direction: if thread_rng().gen_bool(0.5) {
+            move_direction: if random_bool(0.5) {
                 Direction::Left
             } else {
                 Direction::Right
