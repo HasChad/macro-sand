@@ -2,7 +2,7 @@ use macroquad::color::Color;
 use rand::random_bool;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum CellState {
+pub enum CellType {
     Dead,
     Sand,
     Water,
@@ -17,7 +17,7 @@ pub enum Direction {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum CellType {
+pub enum CellMatter {
     Solid,
     Liquid,
     //Gas,
@@ -26,56 +26,57 @@ pub enum CellType {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Cell {
-    pub state: CellState,
     pub cell_type: CellType,
+    pub matter: CellMatter,
     pub move_direction: Direction,
     pub is_moved: bool,
     pub color: Color,
 }
 
 impl Cell {
-    pub fn spawn_empty() -> Cell {
-        Cell {
-            state: CellState::Dead,
+    pub fn empty() -> Self {
+        Self {
+            cell_type: CellType::Dead,
+            matter: CellMatter::None,
             move_direction: Direction::None,
-            cell_type: CellType::None,
             is_moved: false,
             color: Color::from_rgba(10, 10, 10, 255),
         }
     }
-    pub fn spawn_sand() -> Cell {
-        Cell {
-            state: CellState::Sand,
+
+    pub fn sand() -> Self {
+        Self {
+            cell_type: CellType::Sand,
+            matter: CellMatter::Solid,
             move_direction: if random_bool(0.5) {
                 Direction::Left
             } else {
                 Direction::Right
             },
-            cell_type: CellType::Solid,
             is_moved: true,
             color: Color::from_rgba(255, 204, 92, 255),
         }
     }
 
-    pub fn spawn_water() -> Cell {
-        Cell {
-            state: CellState::Water,
+    pub fn water() -> Self {
+        Self {
+            cell_type: CellType::Water,
+            matter: CellMatter::Liquid,
             move_direction: if random_bool(0.5) {
                 Direction::Left
             } else {
                 Direction::Right
             },
-            cell_type: CellType::Liquid,
             is_moved: true,
             color: Color::from_rgba(71, 140, 207, 255),
         }
     }
 
-    pub fn spawn_stone() -> Cell {
-        Cell {
-            state: CellState::Stone,
+    pub fn stone() -> Self {
+        Self {
+            cell_type: CellType::Stone,
+            matter: CellMatter::Solid,
             move_direction: Direction::None,
-            cell_type: CellType::Solid,
             is_moved: true,
             color: Color::from_rgba(151, 125, 139, 255),
         }

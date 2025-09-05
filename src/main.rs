@@ -1,37 +1,58 @@
-// #![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
+// use egui_macroquad::prelude::*;
 use macroquad::prelude::*;
 
 mod app_settings;
 mod brush_update;
 mod cell_updates;
 mod cells;
+mod draw;
+mod ui;
 
 use app_settings::*;
 use brush_update::*;
 use cell_updates::*;
 use cells::*;
+use draw::*;
+use ui::*;
 
 const GRID_X_SIZE: usize = 300;
 const GRID_Y_SIZE: usize = 160;
 const DOT_SIZE_IN_PXS: usize = 4;
 
+pub struct AppState {
+    cells: Vec<Cell>,
+    buffer: Vec<Cell>,
+    brush: Cell,
+    image: Image,
+    texture: Texture2D,
+    render_right: bool,
+}
+
+impl AppState {
+    fn new() -> Self {
+        let image = Image::gen_image_color(
+            GRID_X_SIZE as u16,
+            GRID_Y_SIZE as u16,
+            Color::from_rgba(10, 10, 10, 255),
+        );
+
+        Self {
+            buffer: vec![Cell::empty(); GRID_X_SIZE * GRID_Y_SIZE],
+            cells: vec![Cell::empty(); GRID_X_SIZE * GRID_Y_SIZE],
+            brush: Cell::sand(),
+            image: image.clone(),
+            texture: Texture2D::from_image(&image),
+            render_right: false,
+        }
+    }
+}
+
 #[macroquad::main(window_conf)]
 pub async fn main() -> Result<(), String> {
-    // Rendering things
-    let mut image = Image::gen_image_color(
-        GRID_X_SIZE as u16,
-        GRID_Y_SIZE as u16,
-        Color::from_rgba(10, 10, 10, 255),
-    );
-    let texture = Texture2D::from_image(&image);
+    let mut app_state = AppState::new();
 
-    // Game things
-    let mut buffer = vec![Cell::spawn_empty(); GRID_X_SIZE * GRID_Y_SIZE];
-    let mut cells = vec![Cell::spawn_empty(); GRID_X_SIZE * GRID_Y_SIZE];
-    let mut brush = Cell::spawn_sand();
-
-    // Game Loop
     'running: loop {
         if is_key_pressed(KeyCode::Escape) {
             break 'running;
@@ -45,87 +66,16 @@ pub async fn main() -> Result<(), String> {
             std::thread::sleep(std::time::Duration::from_millis(time_to_sleep as u64));
         }
 
-        update_brush(&mut buffer, &mut brush).await;
-        update_world(&mut cells, &mut buffer).await;
-        draw_world(&mut cells, &mut buffer, &mut image, &texture).await;
+        ui(&mut app_state);
+
+        update_brush(&mut app_state).await;
+        update_world(&mut app_state).await;
+        draw_world(&mut app_state).await;
+
+        egui_macroquad::draw();
 
         next_frame().await
     }
 
     Ok(())
-}
-
-async fn draw_world(
-    cells: &mut [Cell],
-    buffer: &mut [Cell],
-    image: &mut Image,
-    texture: &Texture2D,
-) {
-    let mut test = 0;
-    // Per-pixel coloring
-    for (i, cell) in buffer.iter().enumerate() {
-        image.set_pixel(
-            (i % GRID_X_SIZE) as u32,
-            (i / GRID_X_SIZE) as u32,
-            cell.color,
-        );
-
-        if cell.state == CellState::Sand {
-            test += 1;
-        };
-
-        cells[i] = *cell;
-    }
-
-    info!("water count = {}", test);
-
-    // Cursor
-    let (mouse_xpos, mouse_ypos) = mouse_position();
-    let pixel_posx = mouse_xpos as u32 / DOT_SIZE_IN_PXS as u32;
-    let pixel_posy = mouse_ypos as u32 / DOT_SIZE_IN_PXS as u32;
-
-    if mouse_xpos >= 0.
-        && mouse_xpos < screen_width()
-        && mouse_ypos >= 0.
-        && mouse_ypos < screen_height()
-    {
-        // left
-        if mouse_xpos > DOT_SIZE_IN_PXS as f32 {
-            image.set_pixel(pixel_posx - 1, pixel_posy, WHITE);
-        }
-        // right
-        if mouse_xpos < screen_width() - DOT_SIZE_IN_PXS as f32 {
-            image.set_pixel(pixel_posx + 1, pixel_posy, WHITE);
-        }
-        // top
-        if mouse_ypos > DOT_SIZE_IN_PXS as f32 {
-            image.set_pixel(pixel_posx, pixel_posy - 1, WHITE);
-        }
-        // bottom
-        if mouse_ypos < screen_height() - DOT_SIZE_IN_PXS as f32 {
-            image.set_pixel(pixel_posx, pixel_posy + 1, WHITE);
-        }
-    }
-
-    // Rendering
-    texture.update(image);
-    texture.set_filter(FilterMode::Nearest);
-
-    draw_texture_ex(
-        texture,
-        0.,
-        0.,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(Vec2 {
-                x: screen_width(),
-                y: screen_height(),
-            }),
-            source: None,
-            rotation: 0.,
-            flip_x: false,
-            flip_y: false,
-            pivot: None,
-        },
-    );
 }
