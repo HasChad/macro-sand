@@ -83,14 +83,22 @@ pub async fn update_solid(
         buffer[down] = cell_type;
 
     // Down left
-    } else if downleft_is_empty {
+    } else if downleft_is_empty && buffer[pixel_pos].move_direction == Direction::Left {
         buffer[pixel_pos] = Cell::empty();
         buffer[down_left] = cell_type;
+        buffer[down_left].move_direction = Direction::Left;
 
     // Down right
-    } else if downright_is_empty {
+    } else if downright_is_empty && buffer[pixel_pos].move_direction == Direction::Right {
         buffer[pixel_pos] = Cell::empty();
         buffer[down_right] = cell_type;
+        buffer[down_right].move_direction = Direction::Right;
+    } else {
+        match buffer[pixel_pos].move_direction {
+            Direction::Right => buffer[pixel_pos].move_direction = Direction::Left,
+            Direction::Left => buffer[pixel_pos].move_direction = Direction::Right,
+            _ => (),
+        }
     }
 }
 
@@ -118,13 +126,15 @@ pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [C
             buffer[down] = Cell::water();
 
         // Down left
-        } else if downleft_is_empty {
+        } else if downleft_is_empty && buffer[pixel_pos].move_direction == Direction::Left {
             buffer[pixel_pos] = Cell::empty();
             buffer[down_left] = Cell::water();
+            buffer[down_left].move_direction = Direction::Left;
         // Down right
-        } else if downright_is_empty {
+        } else if downright_is_empty && buffer[pixel_pos].move_direction == Direction::Right {
             buffer[pixel_pos] = Cell::empty();
             buffer[down_right] = Cell::water();
+            buffer[down_right].move_direction = Direction::Right;
         } else {
             go_side = true;
         }
