@@ -19,18 +19,49 @@ use ui::*;
 const GRID_X_SIZE: usize = 300;
 const GRID_Y_SIZE: usize = 160;
 const DOT_SIZE_IN_PXS: usize = 4;
-const TICK_RATE: f64 = 120.0;
+const TICK_RATE: f64 = 60.0;
 const TICK_DURATION: f64 = 1.0 / TICK_RATE;
 
-enum Test {
-    Ah,
-    Uh,
+#[derive(PartialEq)]
+struct Brush {
+    brush_type: Cell,
+    pos: Vec<Vec2>,
+    size: usize,
 }
 
-pub struct AppState {
+impl Brush {
+    fn new() -> Self {
+        let size: usize = 5;
+        let mut pos: Vec<Vec2> = vec![];
+
+        for y in 0..size {
+            for x in 0..size {
+                pos.push(Vec2::new(x as f32, y as f32));
+            }
+        }
+
+        Self {
+            brush_type: Cell::sand(),
+            pos,
+            size,
+        }
+    }
+
+    pub fn size_update(self: &mut Self, size: usize) {
+        self.pos.clear();
+
+        for y in 0..size {
+            for x in 0..size {
+                self.pos.push(Vec2::new(x as f32, y as f32));
+            }
+        }
+    }
+}
+
+struct AppState {
     cells: Vec<Cell>,
     buffer: Vec<Cell>,
-    brush: Cell,
+    brush: Brush,
     image: Image,
     texture: Texture2D,
     render_right: bool,
@@ -45,11 +76,10 @@ impl AppState {
             Color::from_rgba(10, 10, 10, 255),
         );
 
-        // testing comment
         Self {
             buffer: vec![Cell::empty(); GRID_X_SIZE * GRID_Y_SIZE],
             cells: vec![Cell::empty(); GRID_X_SIZE * GRID_Y_SIZE],
-            brush: Cell::sand(),
+            brush: Brush::new(),
             image: image.clone(),
             texture: Texture2D::from_image(&image),
             render_right: false,
@@ -67,12 +97,10 @@ pub async fn main() -> Result<(), String> {
             break 'running;
         }
 
-        println!("tesing");
-        info!("test");
+        update_brush(&mut app_state).await;
 
         app_state.tick_accumulator += get_frame_time() as f64;
-        while app_state.tick_accumulator >= TICK_DURATION {
-            update_brush(&mut app_state).await;
+        if app_state.tick_accumulator >= TICK_DURATION {
             update_world(&mut app_state).await;
             app_state.tick_accumulator -= TICK_DURATION;
         }
@@ -83,5 +111,6 @@ pub async fn main() -> Result<(), String> {
 
         next_frame().await
     }
+
     Ok(())
 }

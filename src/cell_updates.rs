@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::{
-    cells::{Cell, CellType, Direction},
+    cells::{Cell, CellMatter, CellType, Direction},
     AppState, GRID_X_SIZE, GRID_Y_SIZE,
 };
 
@@ -16,10 +16,17 @@ pub async fn update_world(state: &mut AppState) {
             for x in 0..GRID_X_SIZE {
                 let pixel_pos: usize = x + (y * GRID_X_SIZE);
 
-                match state.cells[pixel_pos].cell_type {
-                    CellType::Sand => update_sand(x, y, pixel_pos, &mut state.buffer).await,
-                    CellType::Water => update_water(x, y, pixel_pos, &mut state.buffer).await,
-                    _ => (),
+                if state.cells[pixel_pos].move_direction != Direction::None {
+                    match state.cells[pixel_pos].matter {
+                        CellMatter::Solid => {
+                            update_solid(x, y, pixel_pos, &mut state.buffer, state.cells[pixel_pos])
+                                .await
+                        }
+                        CellMatter::Liquid => {
+                            update_liquid(x, y, pixel_pos, &mut state.buffer).await
+                        }
+                        _ => (),
+                    }
                 }
             }
 
@@ -28,10 +35,17 @@ pub async fn update_world(state: &mut AppState) {
             for x in (0..GRID_X_SIZE).rev() {
                 let pixel_pos: usize = x + (y * GRID_X_SIZE);
 
-                match state.cells[pixel_pos].cell_type {
-                    CellType::Sand => update_sand(x, y, pixel_pos, &mut state.buffer).await,
-                    CellType::Water => update_water(x, y, pixel_pos, &mut state.buffer).await,
-                    _ => (),
+                if state.cells[pixel_pos].move_direction != Direction::None {
+                    match state.cells[pixel_pos].matter {
+                        CellMatter::Solid => {
+                            update_solid(x, y, pixel_pos, &mut state.buffer, state.cells[pixel_pos])
+                                .await
+                        }
+                        CellMatter::Liquid => {
+                            update_liquid(x, y, pixel_pos, &mut state.buffer).await
+                        }
+                        _ => (),
+                    }
                 }
             }
 
@@ -40,7 +54,13 @@ pub async fn update_world(state: &mut AppState) {
     }
 }
 
-pub async fn update_sand(x: usize, y: usize, pixel_pos: usize, buffer: &mut [Cell]) {
+pub async fn update_solid(
+    x: usize,
+    y: usize,
+    pixel_pos: usize,
+    buffer: &mut [Cell],
+    cell_type: Cell,
+) {
     if y == GRID_Y_SIZE - 1 {
         return;
     }
@@ -57,68 +77,81 @@ pub async fn update_sand(x: usize, y: usize, pixel_pos: usize, buffer: &mut [Cel
     // Down
     if down_is_empty {
         buffer[pixel_pos] = Cell::empty();
-        buffer[down] = Cell::sand();
+        buffer[down] = cell_type;
 
     // Down water
     } else if buffer[down].cell_type == CellType::Water {
         buffer[pixel_pos] = Cell::water();
-        buffer[down] = Cell::sand();
+        buffer[down] = cell_type;
 
     // Down left
     } else if downleft_is_empty {
         buffer[pixel_pos] = Cell::empty();
-        buffer[down_left] = Cell::sand();
+        buffer[down_left] = cell_type;
 
     // Down right
     } else if downright_is_empty {
         buffer[pixel_pos] = Cell::empty();
-        buffer[down_right] = Cell::sand();
+        buffer[down_right] = cell_type;
     }
 }
 
-pub async fn update_water(x: usize, y: usize, pixel_pos: usize, buffer: &mut [Cell]) {
-    let down: usize = pixel_pos + GRID_X_SIZE;
-    let down_left: usize = down - 1;
-    let down_right: usize = down + 1;
-    let left: usize = pixel_pos - 1;
-    let right: usize = pixel_pos + 1;
+pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [Cell]) {
+    // if y < 0
+    // if downleft and right not available
 
-    // Checkers
-    let downleft_is_empty = buffer[down_left] == Cell::empty() && x != 0;
-    let downright_is_empty = buffer[down_right] == Cell::empty() && x != GRID_X_SIZE - 1;
-    let left_is_empty = buffer[left] == Cell::empty() && x != 0;
-    let right_is_empty = buffer[right] == Cell::empty() && x != GRID_X_SIZE - 1;
+    let mut go_side = false;
 
-    // Down
-    if buffer[down] == Cell::empty() && y != GRID_Y_SIZE - 1 {
-        buffer[pixel_pos] = Cell::empty();
-        buffer[down] = Cell::water();
+    if y != GRID_Y_SIZE - 1 {
+        let down: usize = pixel_pos + GRID_X_SIZE;
+        let down_left: usize = down - 1;
+        let down_right: usize = down + 1;
 
-    // Down left
-    } else if downleft_is_empty {
-        buffer[pixel_pos] = Cell::empty();
-        buffer[down_left] = Cell::water();
+        let downleft_is_empty = buffer[down_left] == Cell::empty() && x != 0;
+        let downright_is_empty = buffer[down_right] == Cell::empty() && x != GRID_X_SIZE - 1;
 
-    // Down right
-    } else if downright_is_empty {
-        buffer[pixel_pos] = Cell::empty();
-        buffer[down_right] = Cell::water();
+        // Down
+        if buffer[down] == Cell::empty() {
+            buffer[pixel_pos] = Cell::empty();
+            buffer[down] = Cell::water();
 
-    // Sides
-    } else if left_is_empty && buffer[pixel_pos].move_direction == Direction::Left {
-        buffer[pixel_pos] = Cell::empty();
-        buffer[left] = Cell::water();
-        buffer[left].move_direction = Direction::Left;
-    // Right
-    } else if right_is_empty && buffer[pixel_pos].move_direction == Direction::Right {
-        buffer[pixel_pos] = Cell::empty();
-        buffer[right] = Cell::water();
-        buffer[right].move_direction = Direction::Right;
-    } else {
-        match buffer[pixel_pos].move_direction {
-            Direction::Right => buffer[pixel_pos].move_direction = Direction::Left,
-            Direction::Left => buffer[pixel_pos].move_direction = Direction::Right,
-            Direction::None => todo!(),
-        };
+        // Down left
+        } else if downleft_is_empty {
+            buffer[pixel_pos] = Cell::empty();
+            buffer[down_left] = Cell::water();
+
+        // Down right
+        } else if downright_is_empty {
+            buffer[pixel_pos] = Cell::empty();
+            buffer[down_right] = Cell::water();
+        } else {
+            go_side = true;
+        }
+    }
+
+    if go_side {
+        let left: usize = pixel_pos - 1;
+        let right: usize = pixel_pos + 1;
+
+        let left_is_empty = buffer[left] == Cell::empty() && x != 0;
+        let right_is_empty = buffer[right] == Cell::empty() && x != GRID_X_SIZE - 1;
+
+        // Left
+        if left_is_empty && buffer[pixel_pos].move_direction == Direction::Left {
+            buffer[pixel_pos] = Cell::empty();
+            buffer[left] = Cell::water();
+            buffer[left].move_direction = Direction::Left;
+        // Right
+        } else if right_is_empty && buffer[pixel_pos].move_direction == Direction::Right {
+            buffer[pixel_pos] = Cell::empty();
+            buffer[right] = Cell::water();
+            buffer[right].move_direction = Direction::Right;
+        } else {
+            match buffer[pixel_pos].move_direction {
+                Direction::Right => buffer[pixel_pos].move_direction = Direction::Left,
+                Direction::Left => buffer[pixel_pos].move_direction = Direction::Right,
+                _ => (),
+            };
+        }
     }
 }

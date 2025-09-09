@@ -42,10 +42,10 @@ pub async fn draw_world(state: &mut AppState) {
     let m_posy = mouse_ypos as u32;
 
     draw_rectangle_lines(
-        m_posx as f32 - 1.0 * DOT_SIZE_IN_PXS as f32,
-        m_posy as f32 - 1.0 * DOT_SIZE_IN_PXS as f32,
-        3.0 * DOT_SIZE_IN_PXS as f32,
-        3.0 * DOT_SIZE_IN_PXS as f32,
+        m_posx as f32,
+        m_posy as f32,
+        (state.brush.size * DOT_SIZE_IN_PXS) as f32,
+        (state.brush.size * DOT_SIZE_IN_PXS) as f32,
         2.0,
         WHITE,
     );
