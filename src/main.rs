@@ -19,7 +19,7 @@ use ui::*;
 const GRID_X_SIZE: usize = 300;
 const GRID_Y_SIZE: usize = 160;
 const DOT_SIZE_IN_PXS: usize = 4;
-const TICK_RATE: f64 = 60.0;
+const TICK_RATE: f64 = 120.0;
 const TICK_DURATION: f64 = 1.0 / TICK_RATE;
 
 #[derive(PartialEq)]
@@ -65,6 +65,7 @@ struct AppState {
     image: Image,
     texture: Texture2D,
     render_right: bool,
+    can_draw: bool,
     tick_accumulator: f64,
 }
 
@@ -83,6 +84,7 @@ impl AppState {
             image: image.clone(),
             texture: Texture2D::from_image(&image),
             render_right: false,
+            can_draw: true,
             tick_accumulator: 0.0,
         }
     }
@@ -97,7 +99,9 @@ pub async fn main() -> Result<(), String> {
             break 'running;
         }
 
-        update_brush(&mut app_state).await;
+        if app_state.can_draw {
+            update_brush(&mut app_state).await;
+        }
 
         app_state.tick_accumulator += get_frame_time() as f64;
         if app_state.tick_accumulator >= TICK_DURATION {

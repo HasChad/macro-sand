@@ -3,6 +3,10 @@ use macroquad::prelude::*;
 use crate::{cells::Cell, AppState, DOT_SIZE_IN_PXS, GRID_X_SIZE, GRID_Y_SIZE};
 
 pub async fn update_brush(state: &mut AppState) {
+    if is_key_pressed(KeyCode::Space) {
+        state.buffer.fill(Cell::empty());
+    }
+
     let (m_xpos, m_ypos) = mouse_position();
 
     if is_mouse_button_down(MouseButton::Left) {

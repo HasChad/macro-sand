@@ -3,11 +3,13 @@ use egui_macroquad::egui::{self, Slider};
 use crate::{cells::Cell, AppState};
 
 pub fn ui(state: &mut AppState) {
-    egui_macroquad::ui(|egui_ctx| {
+    egui_macroquad::ui(|ctx| {
+        state.can_draw = !ctx.wants_pointer_input();
+
         egui::Window::new("Settings")
             .resizable(false)
             .collapsible(false)
-            .show(egui_ctx, |ui| {
+            .show(ctx, |ui| {
                 egui::Grid::new("my_grid")
                     .num_columns(2)
                     .spacing([10.0, 5.0])

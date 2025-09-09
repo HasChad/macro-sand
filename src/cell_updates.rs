@@ -1,15 +1,9 @@
-use macroquad::prelude::*;
-
 use crate::{
     cells::{Cell, CellMatter, CellType, Direction},
     AppState, GRID_X_SIZE, GRID_Y_SIZE,
 };
 
 pub async fn update_world(state: &mut AppState) {
-    if is_key_pressed(KeyCode::Space) {
-        state.buffer.fill(Cell::empty());
-    }
-
     // Pixel iterate
     for y in (0..GRID_Y_SIZE).rev() {
         if state.render_right {
@@ -72,7 +66,11 @@ pub async fn update_solid(
     // Checkers
     let down_is_empty = buffer[down] == Cell::empty();
     let downleft_is_empty = buffer[down_left] == Cell::empty() && x != 0;
-    let downright_is_empty = buffer[down_right] == Cell::empty() && x != GRID_X_SIZE - 1;
+    let downright_is_empty = if x != GRID_X_SIZE - 1 {
+        buffer[down_right] == Cell::empty()
+    } else {
+        false
+    };
 
     // Down
     if down_is_empty {
@@ -108,7 +106,11 @@ pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [C
         let down_right: usize = down + 1;
 
         let downleft_is_empty = buffer[down_left] == Cell::empty() && x != 0;
-        let downright_is_empty = buffer[down_right] == Cell::empty() && x != GRID_X_SIZE - 1;
+        let downright_is_empty = if x != GRID_X_SIZE - 1 {
+            buffer[down_right] == Cell::empty()
+        } else {
+            false
+        };
 
         // Down
         if buffer[down] == Cell::empty() {
@@ -119,7 +121,6 @@ pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [C
         } else if downleft_is_empty {
             buffer[pixel_pos] = Cell::empty();
             buffer[down_left] = Cell::water();
-
         // Down right
         } else if downright_is_empty {
             buffer[pixel_pos] = Cell::empty();
@@ -127,6 +128,8 @@ pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [C
         } else {
             go_side = true;
         }
+    } else {
+        go_side = true;
     }
 
     if go_side {
@@ -134,7 +137,11 @@ pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [C
         let right: usize = pixel_pos + 1;
 
         let left_is_empty = buffer[left] == Cell::empty() && x != 0;
-        let right_is_empty = buffer[right] == Cell::empty() && x != GRID_X_SIZE - 1;
+        let right_is_empty = if x != GRID_X_SIZE - 1 {
+            buffer[right] == Cell::empty()
+        } else {
+            false
+        };
 
         // Left
         if left_is_empty && buffer[pixel_pos].move_direction == Direction::Left {
