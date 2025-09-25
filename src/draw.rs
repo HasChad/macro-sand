@@ -4,7 +4,7 @@ use crate::{AppState, DOT_SIZE_IN_PXS, GRID_X_SIZE};
 
 pub async fn draw_world(state: &mut AppState) {
     // Per-pixel coloring
-    for (i, cell) in state.buffer.iter().enumerate() {
+    for (i, cell) in state.buffer.iter_mut().enumerate() {
         state.image.set_pixel(
             (i % GRID_X_SIZE) as u32,
             (i / GRID_X_SIZE) as u32,

@@ -103,9 +103,6 @@ pub async fn update_solid(
 }
 
 pub async fn update_liquid(x: usize, y: usize, pixel_pos: usize, buffer: &mut [Cell]) {
-    // if y < 0
-    // if downleft and right not available
-
     let mut go_side = false;
 
     if y != GRID_Y_SIZE - 1 {

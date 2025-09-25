@@ -99,14 +99,14 @@ pub async fn main() -> Result<(), String> {
             break 'running;
         }
 
-        if app_state.can_draw {
-            update_brush(&mut app_state).await;
-        }
-
         app_state.tick_accumulator += get_frame_time() as f64;
         if app_state.tick_accumulator >= TICK_DURATION {
             update_world(&mut app_state).await;
             app_state.tick_accumulator -= TICK_DURATION;
+        }
+
+        if app_state.can_draw {
+            update_brush(&mut app_state).await;
         }
 
         ui(&mut app_state);
