@@ -3,7 +3,6 @@ use macroquad::prelude::*;
 use crate::{AppState, DOT_SIZE_IN_PXS, GRID_X_SIZE};
 
 pub async fn draw_world(state: &mut AppState) {
-    // Per-pixel coloring
     for (i, cell) in state.buffer.iter_mut().enumerate() {
         state.image.set_pixel(
             (i % GRID_X_SIZE) as u32,
@@ -38,8 +37,8 @@ pub async fn draw_world(state: &mut AppState) {
 
     // Cursor
     let (mouse_xpos, mouse_ypos) = mouse_position();
-    let m_posx = mouse_xpos as u32;
-    let m_posy = mouse_ypos as u32;
+    let m_posx = mouse_xpos as usize - (mouse_xpos as usize % DOT_SIZE_IN_PXS);
+    let m_posy = mouse_ypos as usize - (mouse_ypos as usize % DOT_SIZE_IN_PXS);
 
     draw_rectangle_lines(
         m_posx as f32,
