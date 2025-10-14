@@ -66,6 +66,7 @@ struct AppState {
     texture: Texture2D,
     render_right: bool,
     can_draw: bool,
+    clear: bool,
     tick_accumulator: f64,
 }
 
@@ -85,6 +86,7 @@ impl AppState {
             texture: Texture2D::from_image(&image),
             render_right: false,
             can_draw: true,
+            clear: false,
             tick_accumulator: 0.0,
         }
     }
@@ -97,6 +99,10 @@ pub async fn main() -> Result<(), String> {
     'running: loop {
         if is_key_pressed(KeyCode::Escape) {
             break 'running;
+        }
+
+        if is_key_pressed(KeyCode::Space) {
+            app_state.clear = true;
         }
 
         app_state.tick_accumulator += get_frame_time() as f64;
