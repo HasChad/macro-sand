@@ -6,4 +6,4 @@ Left Click: Brush
 Right Click: Erase  
 Space: Clear canvas  
 
-![](macro-sand-preview.mp4)
+![](macro-sand-preview.gif)
