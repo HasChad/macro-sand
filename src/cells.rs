@@ -1,5 +1,5 @@
-use macroquad::color::Color;
-use rand::random_bool;
+use ::rand::random_bool;
+use macroquad::prelude::*;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CellType {

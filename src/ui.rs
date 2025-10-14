@@ -23,7 +23,10 @@ pub fn ui(state: &mut AppState) {
                         ui.end_row();
                         ui.radio_value(&mut state.brush.brush_type, Cell::stone(), "Stone");
                         ui.end_row();
-                        if ui.add(Slider::new(&mut state.brush.size, 1..=10)).changed() {
+                        if ui
+                            .add(Slider::new(&mut state.brush.size, 1..=10).trailing_fill(true))
+                            .changed()
+                        {
                             state.brush.size_update(state.brush.size);
                         }
                     })
